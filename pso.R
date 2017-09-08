@@ -1,5 +1,5 @@
 # pso no shuffling with bad neighbourhood approach
-PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T){
+PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T,restart=F,filename=NULL){
   source("drut_eval.R")
   if(minimize){
     facmin=1
@@ -31,6 +31,13 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
   pbest_loc=swarm
   xmax_mat=matrix(rep(xmax,pop),nrow=pop,byrow=T)
   xmin_mat=matrix(rep(xmin,pop),nrow=pop,byrow=T)
+  
+  
+  if(restart){
+    pbest_loc=read.csv(filename,header=T)
+    pbest_loc=as.matrix(pbest_loc[,2:(dim+1)])
+    swarm=pbest_loc
+  }
   
   # parallel evaluation
   index=sort(rep(1:ceiling((pop/maxeval)),maxeval))
@@ -75,7 +82,7 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
   # Update
   ##############
   k=1 # generation index
-  results=matrix(ncol=dim,nrow=1) # returned with global best in the end
+  results=matrix(ncol=dim+1,nrow=1) # returned with global best in the end
   modeall=T
   switch=0
   reshuffle_prob=start_shuffle_prob
@@ -196,6 +203,13 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
     }
     if(printall){
       write.csv(cbind(swarm,result),paste('inverse_gen',k,'.csv',sep=''))
+    }
+    if(k==1){
+      results=cbind(t(gbest_loc),gbest)
+    }
+    else{
+      resulttemp=cbind(t(gbest_loc),gbest)
+      results=rbind(results,resulttemp)
     }
     k=k+1 
     reshuffle_prob=reshuffle_prob*red_fac

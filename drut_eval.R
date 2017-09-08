@@ -4,9 +4,9 @@ eval_fun= function(ln_id,obj=1){
   result=matrix(ncol=obj,nrow=ln_id)
   for(i in 1:ln_id){ 
     test=read.table(paste(i,"/out/objfnc.val",sep=''), quote="\"",comment.char="#", sep="",skip=1)
-    result[i,1]=test$V1
+    result[i,1]=test$V1[2]+test$V1[3]
     if(obj>1){
-      result[i,2]=test$V2
+      result[i,2]=test$V1[4]
     }
   }
   return(result)

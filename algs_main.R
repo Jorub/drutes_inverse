@@ -16,15 +16,15 @@ source('sourcealgs.R') # creates connection to algorithms
 # 21 - mo_PSO - particle swarm optimization with dynamic neighborhood approach. Only two objecttives can be solved at this time.
 
 ## choose algorithm
-alg = 1
+alg = 7
 
 ## set up
 # ranges, need to be in the same order as in drut_opti.sh script, equal min and max values will be ignored
-mins = c(alphamin1 = 0.01 , nmin1 = 1.3 ,Thsmin1 = 0.57 , Thrmin1 = 0.0, Ksmin1 = 0.001 )
-maxs = c(alphamax1 = 0.1  , nmax1 = 2.5 ,Thsmax1 = 0.57 , Thrmax1 = 0.0, Ksmax1 = 0.1   )
+mins = c(alphamin1 = 0.01 , nmin1 = 1.3 ,Thsmin1 = 0.56 , Ksmin1 = 0.001 )
+maxs = c(alphamax1 = 0.1  , nmax1 = 2.5 ,Thsmax1 = 0.58 , Ksmax1 = 0.1   )
   
 # optimization
-pop = 100 # population 
+pop = 40 # population 
 complexes = 2 # only important for algorithms with sce, will be ignored otherwise
 
 # reinitilization
@@ -32,13 +32,13 @@ reini_prop = 0.95 # reinitilization probability for population to not be reiniti
 red_fac = 0.99 # reduction fac of reiniprop. After each algorithm the reinitilization probability will be reduced to make reinitilization more liklely. Set to 1 or higher if not wanted.
 
 # termination criteria
-gen = 1000 # maximum number of generations, maximum number of function calls = pop*gen
+gen = 11 # maximum number of generations, maximum number of function calls = pop*gen
 optimum = 0 # ideal value of function value of the optimum, e.g. using RMSE is 0, does not need to be realistic 
 conv = 1e-6 # convergence criteria, if the global best has not changed more than this.
 conv_gen= 100 # if global best has not changed more than conv for conv_gen consecutive generations, the optimization terminates
 
 # parallel executions
-para=12  
+para= 4
 
 ## Minimization or Maximization problem?
 # all problems will be evaluated with minimzation, but for maximization will be converted to minimzation problem
@@ -49,6 +49,12 @@ minimize=TRUE # TRUE= Minimization, FALSE=Maximization
 # "gbest" - only global best of each generation will be printed into file after optimization finishes, for mo_PSO only final non-dominated solutions will be printed
 output="all" 
 
+
+## restart optimization from old file
+restart=F
+filename="inverse_gen3.csv"
+
+##
 # function call in sourcealgs.R
 callopti(  alg=alg,pop=pop, complexes = complexes
           ,mins=mins, maxs=maxs
@@ -56,4 +62,5 @@ callopti(  alg=alg,pop=pop, complexes = complexes
           ,para=para
           ,minimize=minimize
           ,reini_prop=reini_prop,red_fac=red_fac
-          ,output=output)
+          ,output=output,
+          restart=restart, filename=filename)

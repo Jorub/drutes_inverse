@@ -1,5 +1,5 @@
 
-mo_PSO=function(pop,dim,xmin,xmax,gen,maxeval,start_shuffle_prob=0.995,red_fac=0.99,minimize){
+mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,minimize,restart=F,filename=NULL){
   source("drut_eval.R")
   if(minimize){
     facmin=1
@@ -28,6 +28,12 @@ mo_PSO=function(pop,dim,xmin,xmax,gen,maxeval,start_shuffle_prob=0.995,red_fac=0
   vel=matrix(rep(0,dim*pop),nrow=pop,byrow=T) 
   xmax_mat=matrix(rep(xmax,pop),nrow=pop,byrow=T)
   xmin_mat=matrix(rep(xmin,pop),nrow=pop,byrow=T)
+  
+  if(restart){
+    pbest_loc=read.csv(filename,header=T)
+    pbest_loc=as.matrix(pbest_loc[,2:(dim+1)])
+    swarm=pbest_loc
+  }
   
   # parallel evaluation
   index=sort(rep(1:ceiling((pop/maxeval)),maxeval))
@@ -171,7 +177,7 @@ mo_PSO=function(pop,dim,xmin,xmax,gen,maxeval,start_shuffle_prob=0.995,red_fac=0
     nbests=apply(pops,1,nhood)
     nbests_loc=swarm[nbests,]
     if(printall){
-      write.csv(cbind(pbest_loc,pbest),paste('pareto_gen',k,'.csv',sep=""))
+      write.csv(cbind(pbest_loc,pbest),paste('population_gen',k,'.csv',sep=""))
     }
 
     k=k+1  
@@ -184,5 +190,6 @@ mo_PSO=function(pop,dim,xmin,xmax,gen,maxeval,start_shuffle_prob=0.995,red_fac=0
   nond=apply(pbest,1,testdom)
   pareto=cbind(pbest_loc[nond,],pbest[nond,])
   results=pareto
+  write.csv(pareto,'non_dom_solutions.csv')
   return(results)
 }

@@ -1,6 +1,6 @@
 # TLBO with shuffling mechanism and bad neighbourhood
 # Learning experience with teaching learning based optimization or LETLBO Zou et al. (2015)
-TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T){
+TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T,restart=F,filename=NULL){
   source("drut_eval.R")
   if(minimize){
     facmin=1
@@ -31,12 +31,18 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
   }
   # Initialise learners 
   school_old=matrix(t(runif(class_size*dim,xmin,xmax)),nrow=class_size,byrow=T) 
-  
+  xmax_mat=matrix(rep(xmax,class_size),nrow=class_size,byrow=T)
+  xmin_mat=matrix(rep(xmin,class_size),nrow=class_size,byrow=T)
   teacher=c()
   means=c()
   result_old=c()
   teacher_loc=matrix(ncol=dim,nrow=classes)
   mean_loc=matrix(ncol=dim,nrow=classes)
+  
+  if(restart){
+    school_old=read.csv(filename,header=T)
+    school_old=as.matrix(school_old[,2:(dim+1)])
+  }
   # evaluate learners and define first teacher
   index=sort(rep(1:ceiling((class_size/maxeval)),maxeval))
   index=index[1:class_size]
@@ -120,7 +126,7 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
     }
     # strategy a
     TF=round(1+runif(length(first)))
-    mean_loc_mat=matrix(rep(mean_loc,length(first)),nrow=length(first),byrow=T)           
+    mean_loc_mat=matrix(rep(mean_loc,length(first)),nrow=length(first),byrow=T)     
     school_new[first,]=school_old[first,]+runif(length(first))*(go_to_loc[first,]-TF*mean_loc_mat)
     # strategy b
     other=c(length(second))
@@ -134,7 +140,6 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       for(i in 1:classes){
         other[group_complex[second]==i]=other_cplx[[i]]
       }
-      
     }
     # which is better
     other_better=which(result_old[second]>result_old[other])
@@ -155,6 +160,21 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
         school_new[in_bad_hood,]=school_new[in_bad_hood,]-rndm_gb*(go_to_loc[in_bad_hood,]-school_new[in_bad_hood,])
       }
     }
+    # reflection back into boundaries
+    bound_max=which(school_new> xmax_mat)
+    bound_min=which(school_new < xmin_mat)
+    
+    lnmin=length(bound_min[bound_min])
+    lnmax=length(bound_min[bound_min])
+    while(lnmin>0 | lnmax>0){
+      school_new[bound_max] = xmax_mat[bound_max]-(school_new[bound_max]-xmax_mat[bound_max])
+      school_new[bound_min] = xmin_mat[bound_min]-(school_new[bound_min]-xmin_mat[bound_min])
+      bound_max=which(school_new> xmax_mat)
+      bound_min=which(school_new < xmin_mat)
+      lnmin=length(bound_min)
+      lnmax=length(bound_max)
+    }
+
     # parallel evaluation
     for(i in 1:ceiling(class_size/maxeval)){
       ln_id=(length(index[index==i]))
@@ -197,7 +217,6 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       b=runif(class_size)
       first=which(a<b)
       second=which(a>=b)
-      
     }
     # first strategy, comparison to one other student
     other=c(length(first))
@@ -233,7 +252,6 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       for(i in 1:classes){
         other_one[group_complex[second]==i]=other_cplx[[i]]
       }
-      
     }
     other_two=c()
     other_cplx=tapply(class_vec[second],group_complex[second],sample)
@@ -245,7 +263,6 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       for(i in 1:classes){
         other_two[group_complex[second]==i]=other_cplx[[i]]
       }
-      
     }
     
     id_other=which(result_old[other_one]<result_old[other_two])
@@ -271,7 +288,22 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
         
       }
     }
-
+    #reflection back into nhood
+    bound_max=which(school_new> xmax_mat)
+    bound_min=which(school_new < xmin_mat)
+    
+    lnmin=length(bound_min[bound_min])
+    lnmax=length(bound_min[bound_min])
+    while(lnmin>0 | lnmax>0){
+      school_new[bound_max] = xmax_mat[bound_max]-(school_new[bound_max]-xmax_mat[bound_max])
+      school_new[bound_min] = xmin_mat[bound_min]-(school_new[bound_min]-xmin_mat[bound_min])
+      bound_max=which(school_new> xmax_mat)
+      bound_min=which(school_new < xmin_mat)
+      lnmin=length(bound_min)
+      lnmax=length(bound_max)
+    }
+    
+    
     # parallel evaluation
     for(i in 1:ceiling(class_size/maxeval)){
       ln_id=(length(index[index==i]))
@@ -333,7 +365,13 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       school_old[which(ranks>floor(class_size/2)),]=matrix(t(runif(worst*dim,xmin,xmax)),nrow=worst,byrow=T) 
       reshuffle_prob=start_shuffle_prob
     }
-    
+    if(k==1){
+      results=cbind(t(teacher_loc),teacher)
+    }
+    else{
+      resulttemp=cbind(t(teacher_loc),teacher)
+      results=rbind(results,resulttemp)
+    }
     k=k+1
   }
   write.csv(results,paste('inverse.csv',sep=''))
