@@ -25,7 +25,10 @@ callopti=function(alg, pop, complexes
          "all"=TRUE,
          "gbest"=FALSE
         )
-
+  if(!dir.exists('results')){
+    system('mkdir results')
+  }
+ 
 
   # select algorithm
   switch(as.character(alg),
