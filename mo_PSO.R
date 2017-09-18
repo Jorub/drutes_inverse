@@ -117,8 +117,20 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
     # reflection back into the space when 'hitting' the boundary
     bound_max=which(swarm > xmax_mat)
     bound_min=which(swarm < xmin_mat)
-    swarm[bound_max] = xmax_mat[bound_max]-(swarm[bound_max]-xmax_mat[bound_max])
-    swarm[bound_min] = xmin_mat[bound_min]-(swarm[bound_min]-xmin_mat[bound_min])
+    lnmin=length(bound_min[bound_min])
+    lnmax=length(bound_min[bound_min])
+    while(lnmin>0 | lnmax>0){
+      swarm[bound_max] = xmax_mat[bound_max]-(swarm[bound_max]-xmax_mat[bound_max])
+      swarm[bound_min] = xmin_mat[bound_min]-(swarm[bound_min]-xmin_mat[bound_min])
+      bound_max=which(swarm > xmax_mat)
+      bound_min=which(swarm < xmin_mat)
+      lnmin=length(bound_min[bound_min])
+      lnmax=length(bound_min[bound_min])
+    }
+    
+
+    
+    
     
     # parallel evaluation
     for(i in 1:ceiling(pop/maxeval)){
