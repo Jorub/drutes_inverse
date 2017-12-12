@@ -1,6 +1,6 @@
 # TLBO with shuffling mechanism and bad neighbourhood
 # Learning experience with teaching learning based optimization or LETLBO Zou et al. (2015)
-TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T,restart=F,filename=NULL){
+TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T,restart=F,filename=NULL,logscale=F){
   source("drut_eval.R")
   if(minimize){
     facmin=1
@@ -49,6 +49,9 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
   for(i in 1:ceiling(class_size/maxeval)){
     ln_id=(length(index[index==i]))
     pars_in=cbind(rep('p',ln_id),matrix(school_old[index==i,],nrow=ln_id))
+    if(logscale){
+            pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+    }
     write(t(pars_in),'pars.in',append = F,ncol=dim+1)
     if(i>1){
       result_old=rbind(result_old,fit_func(ln_id))
@@ -56,6 +59,7 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       result_old=fit_func(ln_id)
     }
   }
+  write.csv(cbind(school_old,result_old),paste('results/inverse_gen_init.csv',sep=''))
   teacher=min(result_old)
   pos=which.min(result_old)
   teacher_loc=school_old[pos,]
@@ -179,6 +183,9 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
     for(i in 1:ceiling(class_size/maxeval)){
       ln_id=(length(index[index==i]))
       pars_in=cbind(rep('p',ln_id),matrix(school_new[index==i,],nrow=ln_id))
+      if(logscale){
+              pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+      }
       write(t(pars_in),'pars.in',append = F,ncol=dim+1)
       if(i>1){
         result_new=rbind(result_new,fit_func(ln_id))
@@ -308,6 +315,9 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
     for(i in 1:ceiling(class_size/maxeval)){
       ln_id=(length(index[index==i]))
       pars_in=cbind(rep('p',ln_id),matrix(school_new[index==i,],nrow=ln_id))
+      if(logscale){
+              pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+      }
       write(t(pars_in),'pars.in',append = F,ncol=dim+1)
       if(i>1){
         result_new=rbind(result_new,fit_func(ln_id))
@@ -355,7 +365,7 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
       lbests_loc[rep_id,]=lbests_loc_new[rep_id,]
     }
     if(printall){
-      write.csv(cbind(school_old,result_old),paste('inverse_gen',k,'.csv',sep=''))
+      write.csv(cbind(school_old,result_old),paste('results/inverse_gen',k,'.csv',sep=''))
     }
     reshuffle_prob=reshuffle_prob*start_shuffle_prob
     a=runif(1)
@@ -374,6 +384,6 @@ TLBO_all=function(class_size,classes,dim,xmin,xmax,gen,printall=T,maxeval,start_
     }
     k=k+1
   }
-  write.csv(results,paste('inverse.csv',sep=''))
+  write.csv(results,paste('results/inverse.csv',sep=''))
   return(results)
 }

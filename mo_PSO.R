@@ -1,5 +1,5 @@
 
-mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,minimize,restart=F,filename=NULL){
+mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,minimize,restart=F,filename=NULL,logscale=F){
   source("drut_eval.R")
   if(minimize){
     facmin=1
@@ -41,6 +41,9 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
   for(i in 1:ceiling(pop/maxeval)){
     ln_id=(length(index[index==i]))
     pars_in=cbind(rep('p',ln_id),matrix(swarm[index==i,],nrow=ln_id))
+    if(logscale){
+            pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+    }
     write(t(pars_in),'pars.in',append = F,ncol=dim+1)
     if(i>1){
       result=rbind(result,fit_func(ln_id))
@@ -52,6 +55,8 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
   pbest_loc=swarm
   ranks_ob1=rank(result[,1],ties.method = "random")
   ranks_ob2=rank(result[,2],ties.method = "random")
+  write.csv(cbind(pbest_loc,pbest),paste('results/population_gen_init.csv',sep=""))
+  
   ## Neighbourhoods
   # 1. each particle only has two neighbours to exchange information, which are neighhbours based on objective function 1
   # 2. The particle is going to move towards the best particle in that small neighbourhood
@@ -97,6 +102,7 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
   k=1 # generation index
    # to be returned in the end
   while(k<=gen){
+    print(paste("generation",k))
     mode1=!mode1
     wmax=(0.9-0.2)*(gen-k)/gen+0.2 # based on Suganthan, Roshida and yoshida et al. #0.9
     #wmin=0.2
@@ -128,14 +134,14 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
       lnmax=length(bound_min[bound_min])
     }
     
-
-    
-    
     
     # parallel evaluation
     for(i in 1:ceiling(pop/maxeval)){
       ln_id=(length(index[index==i]))
       pars_in=cbind(rep('p',ln_id),matrix(swarm[index==i,],nrow=ln_id))
+      if(logscale){
+              pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+      }
       write(t(pars_in),'pars.in',append = F,ncol=dim+1)
       if(i>1){
         result=rbind(result,fit_func(ln_id))
@@ -164,6 +170,9 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
       for(i in 1:ceiling(pop/maxeval)){
         ln_id=(length(index[index==i]))
         pars_in=cbind(rep('p',ln_id),matrix(swarm[index==i,],nrow=ln_id))
+        if(logscale){
+                pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+        }
         write(t(pars_in),'pars.in',append = F,ncol=dim+1)
         if(i>1){
           result=rbind(result,fit_func(ln_id))
@@ -189,7 +198,7 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
     nbests=apply(pops,1,nhood)
     nbests_loc=swarm[nbests,]
     if(printall){
-      write.csv(cbind(pbest_loc,pbest),paste('population_gen',k,'.csv',sep=""))
+      write.csv(cbind(pbest_loc,pbest),paste('results/population_gen',k,'.csv',sep=""))
     }
 
     k=k+1  
@@ -202,6 +211,6 @@ mo_PSO=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle
   nond=apply(pbest,1,testdom)
   pareto=cbind(pbest_loc[nond,],pbest[nond,])
   results=pareto
-  write.csv(pareto,'non_dom_solutions.csv')
+  write.csv(pareto,'results/non_dom_solutions.csv')
   return(results)
 }

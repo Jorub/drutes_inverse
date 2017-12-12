@@ -16,15 +16,16 @@ source('sourcealgs.R') # creates connection to algorithms
 # 21 - mo_PSO - particle swarm optimization with dynamic neighborhood approach. Only two objecttives can be solved at this time.
 
 ## choose algorithm
-alg = 21
+alg = 1
 
 ## set up
 # ranges, need to be in the same order as in drut_opti.sh script, equal min and max values will be ignored
-mins =c(alphamin1 = 0.01 , nmin1 = 1.3 ,Thsmin1 = 0.57 , Ksmin1 = 0.001 )#c(alphamin1 = 0.057 , nmin1 = 1.77 ,Thsmin1 = 0.57 , Ksmin1 = 0.06 ) # c(alphamin1 = 0.05 , nmin1 = 1.7 ,Thsmin1 = 0.57 , Ksmin1 = 0.05 ) #c(alphamin1 = 0.01 , nmin1 = 1.3 ,Thsmin1 = 0.57 , Ksmin1 = 0.001 )
-maxs =c(alphamax1 = 0.17  , nmax1 = 2.5 ,Thsmax1 = 0.58 , Ksmax1 = 0.15   )# c(alphamax1 = 0.067  , nmax1 = 2.2 ,Thsmax1 = 0.58 , Ksmax1 = 0.08   )#c(alphamax1 = 0.2  , nmax1 = 2.5 ,Thsmax1 = 0.58 , Ksmax1 = 0.1   )
-  
+mins =c(Kamin = -30 , Kdmin=-30)#
+maxs =c(Kamax = 2.3  , Kdmax= 2.3)# 
+logscale=T # sample uniform between min and max, but use exponent of sampled value as input
+
 # optimization
-pop = 20 # population 
+pop = 4 # population 
 complexes = 2 # only important for algorithms with sce, will be ignored otherwise
 
 # reinitilization
@@ -32,7 +33,7 @@ reini_prop = 0.95 # reinitilization probability for population to not be reiniti
 red_fac = 0.99 # reduction fac of reiniprop. After each algorithm the reinitilization probability will be reduced to make reinitilization more liklely. Set to 1 or higher if not wanted.
 
 # termination criteria
-gen = 5 # maximum number of generations, maximum number of function calls = pop*gen
+gen = 1 # maximum number of generations, maximum number of function calls = pop*gen
 optimum = 0 # ideal value of function value of the optimum, e.g. using RMSE is 0, does not need to be realistic 
 conv = 1e-6 # convergence criteria, if the global best has not changed more than this.
 conv_gen= 100 # if global best has not changed more than conv for conv_gen consecutive generations, the optimization terminates
@@ -52,7 +53,7 @@ output="all"
 
 ## restart optimization from old file
 restart=F
-filename="test.csv"
+filename="solution_files/non_dom_fin.csv"
 
 ##
 # function call in sourcealgs.R
@@ -63,4 +64,4 @@ callopti(  alg=alg,pop=pop, complexes = complexes
           ,minimize=minimize
           ,reini_prop=reini_prop,red_fac=red_fac
           ,output=output,
-          restart=restart, filename=filename)
+          restart=restart, filename=filename,logscale=logscale)

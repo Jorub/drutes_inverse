@@ -1,5 +1,5 @@
 # pso no shuffling with bad neighbourhood approach
-PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T,restart=F,filename=NULL){
+PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffle_prob=0.995,red_fac=0.99,optimum,conv,conv_gen,minimize,bn=T,sce=T,restart=F,filename=NULL,logscale=F){
   source("drut_eval.R")
   if(minimize){
     facmin=1
@@ -45,6 +45,9 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
   for(i in 1:ceiling(pop/maxeval)){
     ln_id=(length(index[index==i]))
     pars_in=cbind(rep('p',ln_id),matrix(swarm[index==i,],nrow=ln_id))
+    if(logscale){
+      pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+    }
     write(t(pars_in),'pars.in',append = F,ncol=dim+1)
     if(i>1){
       result=rbind(result,fit_func(ln_id))
@@ -56,6 +59,8 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
   gbest=min(result)
   pos=which.min(result)
   gbest_loc=swarm[pos,]
+  
+  write.csv(cbind(swarm,result),paste('results/inverse_gen_init.csv',sep=''))
   
   ranks=rank(result,ties.method = "random")
 
@@ -159,6 +164,9 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
     for(i in 1:ceiling(pop/maxeval)){
       ln_id=(length(index[index==i]))
       pars_in=cbind(rep('p',ln_id),matrix(swarm[index==i,],nrow=ln_id))
+      if(logscale){
+        pars_in[,2:(dim+1)]=exp(as.numeric(pars_in[,2:(dim+1)]))
+      }
       write(t(pars_in),'pars.in',append = F,ncol=dim+1)
       if(i>1){
         result=rbind(result,fit_func(ln_id))
@@ -211,7 +219,7 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
       bad_hood=cbind(centr-hood,centr+hood)
     }
     if(printall){
-      write.csv(cbind(swarm,result),paste('inverse_gen',k,'.csv',sep=''))
+      write.csv(cbind(swarm,result),paste('results/inverse_gen',k,'.csv',sep=''))
     }
     if(k==1){
       results=cbind(t(gbest_loc),gbest)
@@ -230,6 +238,6 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
       reshuffle_prob=start_shuffle_prob
     }
   }
-  write.csv(results,paste('inverse.csv',sep=''))
+  write.csv(results,paste('results/inverse.csv',sep=''))
   return(results)
 }
