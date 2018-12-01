@@ -2,10 +2,6 @@
 
 function run_drutes {
 
- # rm -rf $1
-  #mkdir $1
-  #cp -a drutemp/* $1
-
   cd $1
   
   alpha=$2
