@@ -19,14 +19,29 @@ source('sourcealgs.R') # creates connection to algorithms
 ## choose algorithm
 alg <- 9
 
-## set up
+### set up
+
+## Nelder-MEad simplex
+# Only set-up for Nelder-Mead, optim() function. Initial values, for nelder mead, an initial values are needed, not used for other algorithms
+ini_vals <- c(a = 0.01 , n = 2, ths = 0.4, Ks = 0.01)
+# alpha is the reflection coefficient
+alpha <- 1
+# beta is the contraction
+beta <- 0.5
+# gamma is the expansion coefficient
+gamma <- 2
+# maximum iteration
+maxit <- 1000
+#
+abstol <- 1e-12
+
+# other
 # ranges, need to be in the same order as in drut_opti.sh script, equal min and max values will be ignored
 mins <- c(amin = 0.01 , nmin = 2, thsmin = 0.4, Ksmin = 1)#
 maxs <- c(amax = 0.01 , nmax = 2, thsmax = 0.4, Ksmax = 1)# 
 logscale <- T # sample uniform between min and max, but use exponent of sampled value as input
 
-# Initial values, for nelder mead, an initial values are needed, not used for other algorithms
-ini_vals <- c(a = 0.01 , n = 2, ths = 0.4, Ks = 0.01)
+
 
 # optimization
 pop <- 4 # population 
@@ -74,4 +89,7 @@ callopti(  alg = alg, pop = pop, complexes = complexes,
            restart = restart, 
            filename = filename,
            logscale = logscale,
-           ini_vals = ini_vals)
+           ini_vals = ini_vals,
+           alpha = alpha,
+           beta = beta,
+           gamma = gamma)

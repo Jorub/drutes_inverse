@@ -10,7 +10,8 @@ callopti=function(alg, pop, complexes,
                   reini_prop, red_fac,
                   output,
                   restart=F, filename, logscale,
-                  ini_vals){
+                  ini_vals, alpha, beta, gamma,
+                  maxit, abstol){
   
   # check if alg option exist
   alg_opts=c(1:9,21)
@@ -81,8 +82,8 @@ callopti=function(alg, pop, complexes,
                              red_fac=red_fac,optimum,conv,conv_gen,
                              minimize,bn=T,sce=T,restart=restart,
                              filename=filename,logscale=logscale)),
-         "9"=return(my_optim(ini_vals = ini_vals,
-                             filename = filename)),
+         "9"=return(my_optim(ini_vals = ini_vals, alpha = alpha, beta = beta, gamma = gamma,
+                             maxit, abstol)),
          "21"=return(mo_PSO(pop,complexes=1,dim,
                             mins,maxs,gen,printall=printall,
                             maxeval=para,start_shuffle_prob=reini_prop,
