@@ -3,7 +3,7 @@ source('pso.R')
 source('tlbo.R')
 source('my_optim.R')
 
-callopti=function(alg, pop, complexes,
+callopti <- function(alg, pop, complexes,
                   mins, maxs,
                   gen, optimum=0, conv , conv_gen,
                   para, minimize=T,
@@ -14,21 +14,21 @@ callopti=function(alg, pop, complexes,
                   maxit, abstol){
   
   # check if alg option exist
-  alg_opts=c(1:9,21)
+  alg_opts <- c(1:10,21)
   if(!any(alg==alg_opts)){
-    stop('This algorithm option is invalid. Choose 1-8 for single objective optimization and 21 for biobjective optimization')
+    stop('This algorithm option is invalid. Choose 1-10 for single objective optimization and 21 for biobjective optimization')
   }
   
   # set-up parallel computation
   system(paste('./opti_setup.sh', para))
   
-  dim=length(mins)
+  dim <- length(mins)
   printall <- switch(output,
          "all"=TRUE,
          "gbest"=FALSE
         )
   if(!dir.exists('results')){
-    system('mkdir results')
+    system2('mkdir results')
   }
  
 
@@ -84,6 +84,8 @@ callopti=function(alg, pop, complexes,
                              filename=filename,logscale=logscale)),
          "9"=return(my_optim(ini_vals = ini_vals, alpha = alpha, beta = beta, gamma = gamma,
                              maxit = maxit, abstol = abstol)),
+         "10"=return(my_optim_parallel(ini_vals = ini_vals, alpha = alpha, beta = beta, gamma = gamma,
+                             maxit = maxit, abstol = abstol, para = para, mins = mins, maxs = maxs)),
          "21"=return(mo_PSO(pop,complexes=1,dim,
                             mins,maxs,gen,printall=printall,
                             maxeval=para,start_shuffle_prob=reini_prop,

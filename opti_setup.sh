@@ -6,4 +6,3 @@ for i in $(seq 1 $1); do
 	fi
 	cp -a drutemp/* $i
 done
-

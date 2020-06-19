@@ -3,7 +3,7 @@
 source('sourcealgs.R') # creates connection to algorithms
 ### algorithm options
 ## single objective
-# 1 - pso - linear time adaptive particle swarm optimiyation with some strategies to leave local optima
+# 1 - pso - linear time adaptive particle swarm optimization with some strategies to leave local optima
 # 2 - pso_bn - same as pso with a bad neighbourhood approach, where bad neighbourhoods are assigned and population drawn towards best
 # 3 - pso_sce - same as pso with shuffling complexes mechanism
 # 4 - pso_sce_bn - pso with bn and sce
@@ -12,18 +12,19 @@ source('sourcealgs.R') # creates connection to algorithms
 # 7 - tlbo_sce - tlbo with sce
 # 8 - tlbo_sce_bn - tlbo with sce and bn
 # 9 - Nelder mead - uses optim()
+# 10 - Nelder mead - uses optimParallel()
 
 ## biobjective (two objectives)
 # 21 - mo_PSO - particle swarm optimization with dynamic neighborhood approach. Only two objecttives can be solved at this time.
 
 ## choose algorithm
-alg <- 9
+alg <- 1
 
 ### set up
 
 ## Nelder-MEad simplex
 # Only set-up for Nelder-Mead, optim() function. Initial values, for nelder mead, an initial values are needed, not used for other algorithms
-ini_vals <- c(a = 0.01 , n = 2, ths = 0.4, Ks = 0.01)
+ini_vals <- c(a = 1 , b = 5, imp = 7)
 # alpha is the reflection coefficient
 alpha <- 1
 # beta is the contraction
@@ -37,14 +38,14 @@ abstol <- 1e-12
 
 # other
 # ranges, need to be in the same order as in drut_opti.sh script, equal min and max values will be ignored
-mins <- c(amin = 0.01 , nmin = 2, thsmin = 0.4, Ksmin = 1)#
-maxs <- c(amax = 0.01 , nmax = 2, thsmax = 0.4, Ksmax = 1)# 
-logscale <- T # sample uniform between min and max, but use exponent of sampled value as input
+mins <- c(amin = 1, nmin = 1.3, ksmin = 2.6e-6, impmin = 4, csmin = 750, hcmin = 20)#
+maxs <- c(amax = 1.5 , nmax = 1.6, ksmax = 3.6e-6, impmax = 10, csmax = 900, hcmax = 40)# 
+logscale <- F # sample uniform between min and max, but use exponent of sampled value as input
 
 
 
 # optimization
-pop <- 4 # population 
+pop <- 3 # population 
 complexes <- 2 # only important for algorithms with sce, will be ignored otherwise
 
 # reinitilization
@@ -58,7 +59,7 @@ conv <- 1e-6 # convergence criteria, if the global best has not changed more tha
 conv_gen <- 100 # if global best has not changed more than conv for conv_gen consecutive generations, the optimization terminates
 
 # parallel executions
-para <- 1
+para <- 3
 
 ## Minimization or Maximization problem?
 # all problems will be evaluated with minimzation, but for maximization will be converted to minimzation problem
@@ -92,4 +93,6 @@ callopti(  alg = alg, pop = pop, complexes = complexes,
            ini_vals = ini_vals,
            alpha = alpha,
            beta = beta,
-           gamma = gamma)
+           gamma = gamma,
+           maxit = maxit,
+           abstol = abstol)

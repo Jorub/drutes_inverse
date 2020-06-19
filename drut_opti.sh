@@ -7,12 +7,15 @@ function run_drutes {
   alpha=$2
   n=$3
   m=`echo "scale=12; 1.0-1.0/$n" | bc`
-  ths=$4
-  Ks=$5
-
+  Ks=$4
+  imp=$5
+  Csol=$6
+  hc=$7
   #   substitution of parameters into input files for drutes 
-  sed -e 's/!alpha/'$alpha'/g' -e 's/!n/'$n'/g' -e 's/!m/'$m'/g' -e 's/!ths/'$ths'/g' -e 's/!Ks/'$Ks'/g' drutes.conf/water.conf/matrixinv.conf > drutes.conf/water.conf/matrix.conf
-  bin/drutes -o optim > /dev/null
+  sed -e 's/!alpha/'$alpha'/g' -e 's/!n/'$n'/g' -e 's/!m/'$m'/g' -e 's/!Ksat/'$Ks'/g' -e 's/!imp/'$imp'/g' drutes.conf/freeze/freeze_min.conf > drutes.conf/freeze/freeze.conf
+  sed -e 's/!Csolid/'$Csol'/g' -e 's/!hc/'$hc'/g' drutes.conf/freeze/freeze_heat_LTE_min.conf > drutes.conf/freeze/freeze_heat_LTE.conf
+  
+  bin/drutes > /dev/null
   echo 'process': $1 'done' > objfnc_wr.val
   cd ..
     
@@ -24,7 +27,7 @@ rm -f drutes.vals
 
 #count the number of processes       
 let nproc=0
-while read l a b c d; do
+while read l a b c d e f; do
     if [[  $l == "p"  ]]; then
       let nproc=nproc+1
     fi
@@ -32,14 +35,14 @@ while read l a b c d; do
   
 #execute drutes function in parallel
 let z=0
-while read l a b c d
+while read l a b c d e f
   do
     if [[  $l == "p"  ]]; then
       let z=z+1
       if [[ $z -lt $nproc ]] ; then
-        run_drutes $z $a $b $c $d &
+        run_drutes $z $a $b $c $d $e $f&
       else
-        run_drutes $z $a $b $c $d
+        run_drutes $z $a $b $c $d $e $f
       fi
     fi
   done < pars.in

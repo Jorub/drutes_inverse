@@ -26,6 +26,7 @@ PSO_all=function(pop,complexes,dim,xmin,xmax,gen,printall=T,maxeval,start_shuffl
   ###################
   
   vmax=0.3*(xmax-xmin)
+
   swarm=matrix(t(runif(pop*dim,xmin,xmax)),nrow=pop,byrow=T)
   vel=matrix(rep(0,dim*pop),nrow=pop) 
   pbest_loc=swarm
